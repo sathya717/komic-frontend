@@ -95,7 +95,7 @@ export default function RegisterPage() {
               <ListItem>
                 <SvgIcon src={ConnectSvg} />
                 <ListItemText>
-                  <strong>Connect with users around the globe.</strong> share
+                  <strong>Connect with users around the globe.</strong> Share
                   your creativity and get appreciated for your work.
                 </ListItemText>
               </ListItem>
