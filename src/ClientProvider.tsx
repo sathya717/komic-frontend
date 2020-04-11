@@ -10,7 +10,7 @@ const link = new HttpLink({
   uri:
     mode === 'development'
       ? 'http://localhost:4000'
-      : 'http://komic-api.herokuapp.com/',
+      : 'https://komic-api.herokuapp.com/',
 });
 
 const client = new ApolloClient({
