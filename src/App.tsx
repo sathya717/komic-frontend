@@ -1,8 +1,11 @@
-import React from 'react';
-import './App.css';
+import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
+import { AuthContext } from './Context/AuthContext';
+
 import Router from './Router';
 import NavBar from './components/NavBar';
+
+import './App.css';
 
 const StyledButton = styled.button`
   border: none;
@@ -14,6 +17,12 @@ const StyledButton = styled.button`
 `;
 
 function App() {
+  const fetchTokenFromStorage = useContext(AuthContext).fetchTokenFromStorage;
+
+  useEffect(() => {
+    fetchTokenFromStorage();
+  }, []);
+
   return (
     <div>
       <NavBar />

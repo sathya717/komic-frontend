@@ -1,6 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component, useContext } from 'react';
 import styled, { StyledComponent } from 'styled-components';
 import { NavLink, NavLinkProps } from 'react-router-dom';
+
+import { AuthContext } from '../Context/AuthContext';
 
 const Nav = styled.nav`
   position: relative;
@@ -82,30 +84,38 @@ const activeLinkStyle = {
 };
 
 export default function NavBar() {
+  const user = useContext(AuthContext).user;
+
   return (
     <Nav>
       <NavSection>
-        <NavBarLink exact to="/">
+        <NavBarLink exact to='/'>
           <NavTitle>
             {' '}
-            <Icon className="fas fa-meteor"></Icon>
+            <Icon className='fas fa-meteor'></Icon>
             KOMIC
           </NavTitle>
         </NavBarLink>
       </NavSection>
       <NavSection left={30}>
-        <Input type="text" placeholder="Search posts or clans" />
+        <Input type='text' placeholder='Search posts or clans' />
       </NavSection>
       <NavSection left={10}>
-        <CreatePostButton exact to="/post/new">
-          <Icon className="fas fa-plus"></Icon> Create Post
+        <CreatePostButton exact to='/post/new'>
+          <Icon className='fas fa-plus'></Icon> Create Post
         </CreatePostButton>
-        <UserButton exact to="/login" activeStyle={activeLinkStyle}>
-          Login
-        </UserButton>
-        <UserButton exact to="/register" activeStyle={activeLinkStyle}>
-          Sign Up
-        </UserButton>
+        {user ? (
+          <h1>logged in</h1>
+        ) : (
+          <>
+            <UserButton exact to='/login' activeStyle={activeLinkStyle}>
+              Login
+            </UserButton>
+            <UserButton exact to='/register' activeStyle={activeLinkStyle}>
+              Sign Up
+            </UserButton>
+          </>
+        )}
       </NavSection>
     </Nav>
   );

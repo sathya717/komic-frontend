@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import { useLazyQuery, useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import { debounce } from 'debounce';
+import slugify from 'limax';
+import { withRouter } from 'react-router-dom';
+
+import { AuthContext } from '../Context/AuthContext';
+
 import RegisterInput from './RegisterInput';
 
 const Form = styled.form`
@@ -45,6 +50,11 @@ const CheckButton = styled.a`
   cursor: pointer;
 `;
 
+const ErrorLabel = styled(Label)`
+  color: #f15f59;
+  margin-bottom: 10px;
+`;
+
 const Loader = styled.div`
   margin-top: 20px;
   border: 16px solid #000; /* Light grey */
@@ -64,26 +74,26 @@ const Loader = styled.div`
   }
 `;
 
-export default function RegisterForm() {
-  interface values {
-    email?: string;
-    username?: string;
-    password?: string;
-    url?: string;
-  }
+interface values {
+  email?: string;
+  username?: string;
+  password?: string;
+  url?: string;
+}
 
-  interface Error {
-    msg?: string;
-    field?: string;
-  }
+interface Error {
+  msg?: string;
+  field?: string;
+}
 
-  interface Errors {
-    username?: Error;
-    password?: Error;
-    email?: Error;
-    url?: Error;
-  }
+interface Errors {
+  username?: Error;
+  password?: Error;
+  email?: Error;
+  url?: Error;
+}
 
+function RegisterForm({ history }) {
   const [values, setValues] = useState<values>({
     email: '',
     username: '',
@@ -91,22 +101,48 @@ export default function RegisterForm() {
     url: '',
   });
 
+  const setUser = useContext(AuthContext).setUser;
+  const token = useContext(AuthContext).token;
+
+  const [isTouched, setIsTouched] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
 
-  const [createAccount, { data, loading }] = useMutation(CREATE_USER_MUTATION, {
+  const [createAccount, { loading }] = useMutation(CREATE_USER_MUTATION, {
     onError: (err) => {
       const errs = err.graphQLErrors[0].extensions.errors;
       console.log(errs);
       setErrors(errs);
       // console.log(errors);
     },
+    onCompleted: (data) => {
+      const account = data.createAccount;
+      const { token, profile } = account;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(profile));
+      setUser(token, profile);
+      history.push('/');
+    },
   });
 
   const handleChange = (e) => {
-    setValues({
-      ...values,
-      [e.target.name]: e.target.value,
-    });
+    if (e.target.name === 'username' && !isTouched) {
+      const urlSlug = slugify(e.target.value);
+      setValues({
+        ...values,
+        username: e.target.value,
+        url: urlSlug,
+      });
+    } else if (e.target.name === 'url') {
+      setValues({
+        ...values,
+        url: e.target.value,
+      });
+    } else
+      setValues({
+        ...values,
+        [e.target.name]: e.target.value,
+      });
   };
 
   const handleSubmit = (e) => {
@@ -125,6 +161,7 @@ export default function RegisterForm() {
         value={values.email}
         onChange={handleChange}
       />
+      {errors.email && <ErrorLabel>{errors.email.msg}</ErrorLabel>}
       <Label>Username</Label>
       <RegisterInput
         error={errors.username ? true : false}
@@ -134,6 +171,7 @@ export default function RegisterForm() {
         value={values.username}
         onChange={handleChange}
       />
+      {errors.username && <ErrorLabel>{errors.username.msg}</ErrorLabel>}
       <Label>komico.wtf/</Label>
       <RegisterInput
         error={errors.url ? true : false}
@@ -142,7 +180,11 @@ export default function RegisterForm() {
         name='url'
         value={values.url}
         onChange={handleChange}
+        onClick={() => {
+          if (!isTouched) setIsTouched(true);
+        }}
       />
+      {errors.url && <ErrorLabel>{errors.url.msg}</ErrorLabel>}
       <Label>Password</Label>
       <RegisterInput
         error={errors.password ? true : false}
@@ -152,6 +194,7 @@ export default function RegisterForm() {
         value={values.password}
         onChange={handleChange}
       />
+      {errors.password && <ErrorLabel>{errors.password.msg}</ErrorLabel>}
       <ButtonContainer>
         {loading ? <Loader /> : <CreateButton>{'Create Account'}</CreateButton>}
       </ButtonContainer>
@@ -183,8 +226,24 @@ const CREATE_USER_MUTATION = gql`
         url: $url
       }
     ) {
-      code
-      message
+      token
+      profile {
+        id
+        user {
+          id
+          username
+          confirmed
+          createdAt
+          urlSlug {
+            id
+            url
+            createdAt
+          }
+          avatar
+        }
+      }
     }
   }
 `;
+
+export default withRouter(RegisterForm);

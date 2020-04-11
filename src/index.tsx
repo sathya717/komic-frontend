@@ -4,11 +4,14 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import App from './App';
 import ClientProvider from './ClientProvider';
+import AuthProvider from './Context/AuthContext';
 
 ReactDOM.render(
   <Router>
     <ClientProvider>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </ClientProvider>
   </Router>,
   document.getElementById('root')
