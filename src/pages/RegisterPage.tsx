@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import gql from 'graphql-tag';
 import { useLazyQuery } from '@apollo/react-hooks';
 
 import ConnectSvg from '../assets/svg/connect.svg';
 import ClanSvg from '../assets/svg/clan.svg';
 import ModsSvg from '../assets/svg/mods.svg';
 import ProfileSvg from '../assets/svg/profile.svg';
+import RegisterForm from '../components/RegisterForm';
 
 const Section = styled.section`
   margin: 10px 20px;
@@ -40,37 +40,16 @@ interface TitleProps {
 
 const Title = styled.h2<TitleProps>`
   font-weight: bold;
-  font-size: ${props => props.size}rem;
-  text-transform: ${props => props.capitalize && 'capitalize'};
-  text-align: ${props => props.align && props.align};
+  font-size: ${(props) => props.size}rem;
+  text-transform: ${(props) => props.capitalize && 'capitalize'};
+  text-align: ${(props) => props.align && props.align};
   position: relative;
-`;
-
-const Form = styled.form`
-  margin-top: 25px;
-  padding: 5px 30px;
-  text-align: initial;
 `;
 
 const Label = styled.label`
   font-weight: 300;
   font-size: 1.3rem;
   display: block;
-`;
-
-const Input = styled.input`
-  margin: 5px 0px;
-  padding: 10px 20px;
-  width: 100%;
-  outline: none;
-  background-color: #f9f9f9;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-
-  &:first-child {
-    margin-top: 20px;
-    margin-bottom: 5px;
-  }
 `;
 
 const List = styled.ul`
@@ -99,59 +78,7 @@ const SubText = styled.p`
   font-size: 500;
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: center;
-`;
-
-const CreateButton = styled.button`
-  padding: 10px 20px;
-  margin: 20px 0px;
-  background-color: #000;
-  color: #fff;
-  font-size: 0.9rem;
-  border: none;
-  outline: none;
-  font-weight: bold;
-  border-radius: 50px;
-  text-align: center;
-  cursor: pointer;
-`;
-
-const CheckButton = styled.a`
-  text-decoration: none;
-  color: #000;
-  font-style: italic;
-  font-weight: 500;
-  font-size: 0.7rem;
-  cursor: pointer;
-`;
-
 export default function RegisterPage() {
-  const [values, setValues] = useState({
-    email: '',
-    username: '',
-    password: '',
-    url: '',
-  });
-
-  const [getUrlStatus, { loading, data }] = useLazyQuery(
-    FETCH_URL_AVAILABILITY
-  );
-
-  console.log(data);
-
-  const handleChange = e => {
-    setValues({
-      ...values,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const checkUrl = e => {
-    getUrlStatus({ variables: { url: values.url } });
-  };
-
   return (
     <Section>
       <Container>
@@ -204,54 +131,10 @@ export default function RegisterPage() {
               Join Komic
             </Title>
             <SubText>Join {1000} other users in building a community.</SubText>
-            <Form>
-              <Input
-                type="email"
-                placeholder="Email Address"
-                name="email"
-                value={values.email}
-                onChange={handleChange}
-              />
-              <Input
-                type="text"
-                placeholder="Username"
-                name="username"
-                value={values.username}
-                onChange={handleChange}
-              />
-              <Input
-                type="text"
-                placeholder="URL Slug"
-                name="url"
-                value={values.url}
-                onChange={handleChange}
-              />
-              <CheckButton onClick={checkUrl}>
-                Check URL availabilty
-              </CheckButton>
-              <Input
-                type="password"
-                placeholder="Password"
-                name="password"
-                value={values.password}
-                onChange={handleChange}
-              />
-              <ButtonContainer>
-                <CreateButton>Create Account</CreateButton>
-              </ButtonContainer>
-            </Form>
+            <RegisterForm />
           </GridItem>
         </GridContainer>
       </Container>
     </Section>
   );
 }
-
-const FETCH_URL_AVAILABILITY = gql`
-  query checkUserSlugAvailability($url: String!) {
-    checkUserSlugAvailability(url: $url) {
-      code
-      message
-    }
-  }
-`;
