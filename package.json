@@ -6,7 +6,7 @@
   "scripts": {
     "client": "webpack-dev-server --mode development --open --hot",
     "webpack": "webpack",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production --config webpack.prod.js"
   },
   "keywords": [],
   "author": "",
